@@ -16,7 +16,7 @@ A Coolstore app where users can buy some cool merchandise.
 - *Orders*, Completion and checking of orders
 - *Payments*, Checks whether an payment is successfull given a certain Credit Card. 
 
-The demo is simple. Add an item to the cart. Checkout the item by going to the `Cart` tab. Add payment details. If the Card number starts with 4 the payment is succefull else it will show status failed. this is a hard check in the payment service. 
+The demo is simple. Add an item to the cart. Checkout the item by going to the `Cart` tab. Add payment details. If the Card number starts with 4 the payment is successful else it will show status failed. this is a hard check in the payment service. 
 Once done, goto the `Orders` tab. The Order status should be `In Progress`, refresh after a couple of seconds and the status will appear as `COMPLETED` or `FAILED`. It takes a couple of seconds as their is a wait timer in Payment service + the whole process is done in a reactive and event driven way using Kafka and Quarkus.
 
 
