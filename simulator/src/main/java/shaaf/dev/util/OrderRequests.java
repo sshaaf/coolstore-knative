@@ -3,6 +3,8 @@ package shaaf.dev.util;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class OrderRequests {
 
     private static GenerateFullNames fullNames = null;
+
+    private static final Logger log = LoggerFactory.getLogger(OrderRequests.class);
 
     // Set this in app.props to true if you are hitting the actual incidents/responders end points.
     // False would only show the data and not hit the end point.
@@ -46,13 +50,12 @@ public class OrderRequests {
                 .nameOnCard(name)
                 .build();
 
-        System.out.println(order);
-
         if(send){
             backendService.createCart(cartId, "329299", "1");
             backendService.checkOutCart(cartId, order);
         }
 
+        log.info(order.toString());
         return order;
 
     }

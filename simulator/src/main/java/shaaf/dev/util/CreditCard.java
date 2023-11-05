@@ -39,5 +39,15 @@ public class CreditCard {
     public void setNameOnCard(String nameOnCard) {
         this.nameOnCard = nameOnCard;
     }
+
+
+    @Override
+    public String toString() {
+        return "{\"CreditCard\":{"
+                + "        \"number\":\"" + number + "\""
+                + ",         \"expiration\":\"" + expiration + "\""
+                + ",         \"nameOnCard\":\"" + nameOnCard + "\""
+                + "}}";
+    }
 }
 
