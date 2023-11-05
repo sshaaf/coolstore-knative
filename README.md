@@ -208,7 +208,13 @@ spec:
 
 
 ## Deployment
-The deployment is done via the sourcecode. you will need Apache Maven and Java 17 or above to deploy the services to OpenShift
+The deployment is done via the sourcecode. you will need 
+- Apache Maven  
+- Java 17 or above
+- Node version 16
+- Graal VM - 23 or above (This can be skipped if the payment service is not compiled into Native)
+
+
 ![Alt text](./docs/images/deployment.png)
 
 ### Inventory
@@ -313,6 +319,11 @@ oc annotate dc/coolstore-ui app.openshift.io/vcs-ref=ocp-4.13 --overwrite
 ```
 
 ### Payment
+
+Change the following in the application.properties to the namespace the coolstore is being deployed in
+```
+quarkus.container-image.group=user2-cloudnativeapps
+```
 
 creating a native image with GraalVM and deploying it to our namespace.
 ```
