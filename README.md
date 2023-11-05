@@ -5,24 +5,206 @@
 ![Alt text](./docs/images/overview.svg)
 [Shaping tomorrow’s technology: Navigating Cloud Native, Serverless, and Polyglot Programming](https://colocatedeventsna2023.sched.com/event/1Rj1o/shaping-tomorrows-technology-navigating-cloud-native-serverless-and-polyglot-programming-naina-singh-shaaf-syed-red-hat)
 
-This is an demo used on our talk at AppDeveloperCon @ KubeCon NA 2023. 
+This is a demo used in our talk at AppDeveloperCon @ KubeCon NA 2023. The demo walks through a modernization scenario where a developer has already broken down the architecture into microservices. How can they leverage the Knative project and further enhance that with the KEDA. How does the interaction work under scale. We also outline the differences and when to use which technology.
 A Coolstore app where users can buy some cool merchandise.
+
+
 - The UI is built with NodeJS and Angular. And the backend includes multiple services. such as
-- Inventory , The stores inventory, how much items are available etc. 
-- Catalog , The products API
-- Cart, Stores all users carts and intiates the order process by sending a message to Orders
-- Orders, Completion and checking of orders
-- Payments, Checks whether an payment is successfull given a certain Credit Card. 
+- *Inventory* , The stores inventory, how much items are available etc. 
+- *Catalog* , The products API
+- *Cart*, Stores all users carts and intiates the order process by sending a message to Orders
+- *Orders*, Completion and checking of orders
+- *Payments*, Checks whether an payment is successfull given a certain Credit Card. 
 
 ![Alt text](./docs/images/coolstore-ui.png)
 
 ## Setup
+Deploying the operators required for this demo.
+```yaml
+# These are the operators that need to be installed
+
+# OpenShift Serverless operator
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: serverless-operator
+  namespace: openshift-operators
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: serverless-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-keda
+  labels:
+    name: openshift-keda
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: openshift-keda
+  namespace: openshift-keda
+spec:
+  targetNamespaces:
+  - openshift-keda
+---
+# Custom Metrics Autoscaler operator
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-custom-metrics-autoscaler-operator
+  namespace: openshift-keda
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: openshift-custom-metrics-autoscaler-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
+# AMQ Streams operator
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: amq-streams
+  namespace: openshift-operators
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: amq-streams
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+```
+
+Deploying the CRs for the Operators
+
+```yaml
+---
+# Set up Knative serving
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  namespace: knative-serving
+spec: {}
+---
+# Set up Knative eventing
+kind: KnativeEventing
+apiVersion: operator.knative.dev/v1beta1
+metadata:
+  name: knative-eventing
+  namespace: knative-eventing
+spec: {}
+---
+apiVersion: operator.serverless.openshift.io/v1alpha1
+kind: KnativeKafka
+metadata:
+  name: knative-kafka
+  namespace: knative-eventing
+spec:
+  broker:
+    enabled: false
+  channel:
+    enabled: false
+  sink:
+    enabled: true
+  source:
+    enabled: true
+---
+# Set up custom metrics autoscaler
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-keda
+---
+kind: KedaController
+apiVersion: keda.sh/v1alpha1
+metadata:
+  name: keda
+  namespace: openshift-keda
+spec:
+  watchNamespace: ''
+  operator:
+    logLevel: info
+    logEncoder: console
+  metricsServer:
+    logLevel: '0'
+  serviceAccount: {}
+```
+
+Deploying Kafka for communication between services. 
+```yaml
+kind: Kafka
+apiVersion: kafka.strimzi.io/v1beta2
+metadata:
+  name: my-cluster
+  namespace: YOURNAMESPACE
+spec:
+  kafka:
+    replicas: 3
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: tls
+        port: 9093
+        type: internal
+        tls: true
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      default.replication.factor: 3
+      min.insync.replicas: 2
+    storage:
+      type: ephemeral
+  zookeeper:
+    replicas: 3
+    storage:
+      type: ephemeral
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+---
+kind: KafkaTopic
+apiVersion: kafka.strimzi.io/v1beta2
+metadata:
+  name: orders
+  labels:
+    strimzi.io/cluster: my-cluster
+  namespace: YOURNAMESPACE
+spec:
+  partitions: 10
+  replicas: 3
+  config:
+    retention.ms: 604800000
+    segment.bytes: 1073741824
+---
+kind: KafkaTopic
+apiVersion: kafka.strimzi.io/v1beta2
+metadata:
+  name: payments
+  labels:
+    strimzi.io/cluster: my-cluster
+  namespace: YOURNAMESPACE
+spec:
+  partitions: 10
+  replicas: 3
+  config:
+    retention.ms: 604800000
+    segment.bytes: 1073741824    
+    
+```
 
 
 
 ## Deployment
 The deployment is done via the sourcecode. you will need Apache Maven and Java 17 or above to deploy the services to OpenShift
-
+![Alt text](./docs/images/deployment.png)
 
 ### Inventory
 Create the postgresql inventory database to store inventory data. Once the inventory service is deployed it will create default entires in the database. The SQL can be found in src/main/resources/import.sql
@@ -113,7 +295,7 @@ details of all orders can also be seen via the REST endpoint at `/api/orders`
 Install NodeShift so it can deploy the frontend to OpenShift
 
 ```
-cd $PROJECT_SOURCE/coolstore-ui && npm install --save-dev nodeshift
+cd coolstore-ui && npm install --save-dev nodeshift
 ```
 
 Deploy to OpenShift and set labels
@@ -135,7 +317,7 @@ mvn clean package -Pnative -DskipTests -f payment-service
 #### Using Knative Eventing and KEDA
 
 Use the following CR for the Knative Eventing with the payments service.
-```
+```yaml
 apiVersion: sources.knative.dev/v1beta1
 kind: KafkaSource
 metadata:
@@ -156,7 +338,7 @@ bootstrapServers:
 
 
 The following CR is used for KEDA and Payment service
-```
+```yaml
 apiVersion: sources.knative.dev/v1beta1
 kind: KafkaSource
 metadata:
