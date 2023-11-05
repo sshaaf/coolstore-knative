@@ -325,7 +325,7 @@ name: kafka-source
 spec:
 consumerGroup: knative-group
 bootstrapServers:
-- my-cluster-kafka-bootstrap.user1-cloudnativeapps:9092
+- my-cluster-kafka-bootstrap.YOURNAMESPACE:9092
   topics:
 - orders
   sink:
@@ -343,7 +343,7 @@ apiVersion: sources.knative.dev/v1beta1
 kind: KafkaSource
 metadata:
 name: kafka-source
-namespace: user2-cloudnativeapps
+namespace: YOURNAMESPACE
 annotations:
 autoscaling.knative.dev/class: keda.autoscaling.knative.dev
 autoscaling.knative.dev/minScale: "0"
@@ -354,7 +354,7 @@ keda.autoscaling.knative.dev/kafkaLagThreshold: "10"
 spec:
 consumerGroup: knative-group
 bootstrapServers:
-- my-cluster-kafka-bootstrap.user2-cloudnativeapps:9092
+- my-cluster-kafka-bootstrap.YOURNAMESPACE:9092
 topics:
 - order
 sink:
