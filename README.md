@@ -1,11 +1,8 @@
-# Shaping tomorrow’s technology: Navigating Cloud Native, Serverless, and Polyglot Programming
-
-
 
 ![Alt text](./docs/images/overview.svg)
 [Shaping tomorrow’s technology: Navigating Cloud Native, Serverless, and Polyglot Programming](https://colocatedeventsna2023.sched.com/event/1Rj1o/shaping-tomorrows-technology-navigating-cloud-native-serverless-and-polyglot-programming-naina-singh-shaaf-syed-red-hat)
 
-This is a demo used in our talk at AppDeveloperCon @ KubeCon NA 2023. The demo walks through a modernization scenario where a developer has already broken down the architecture into microservices. How can they leverage the Knative project and further enhance that with the KEDA. How does the interaction work under scale. We also outline the differences and when to use which technology.
+This is a demo repository. The demo walks through a modernization scenario where a developer has already broken down the architecture into microservices. How can they leverage the Knative project and further enhance that with the KEDA. How does the interaction work under scale. We also outline the differences and when to use which technology.
 A Coolstore app where users can buy some cool merchandise.
 
 
