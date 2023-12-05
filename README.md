@@ -306,7 +306,9 @@ details of all orders can also be seen via the REST endpoint at `/api/orders`
 Install NodeShift so it can deploy the frontend to OpenShift
 
 ```
-cd coolstore-ui && npm install --save-dev nodeshift
+more .nvmrc
+cd coolstore-ui 
+npm ci
 ```
 
 Deploy to OpenShift and set labels
