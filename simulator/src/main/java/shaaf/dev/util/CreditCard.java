@@ -3,9 +3,9 @@ package shaaf.dev.util;
 public class CreditCard {
 
     // "creditCard": {"number": "4232454678667866","expiration": "04/22","nameOnCard": "Jane G Doe"}
-    private String number = null;
-    private String expiration = null;
-    private String nameOnCard = null;
+    String number = null;
+    String expiration = null;
+    String nameOnCard = null;
 
     public CreditCard() {
     }

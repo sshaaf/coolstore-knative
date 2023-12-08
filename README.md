@@ -248,7 +248,7 @@ Apply application grouping labels (Optional)
 oc label dc/catalog app.kubernetes.io/part-of=catalog app.openshift.io/runtime=spring-boot --overwrite && \
 oc label dc/catalog-database app.kubernetes.io/part-of=catalog app.openshift.io/runtime=postgresql --overwrite && \
 oc annotate dc/catalog app.openshift.io/connects-to=inventory,catalog-database --overwrite && \
-oc annotate dc/catalog app.openshift.io/vcs-uri=https://github.com/RedHat-Middleware-Workshops/cloud-native-workshop-v2m4-labs.git --overwrite && \
+oc annotate dc/catalog app.openshift.io/vcs-uri=https://github.com:sshaaf/coolstore-knative.git --overwrite && \
 oc annotate dc/catalog app.openshift.io/vcs-ref=ocp-4.13 --overwrite
 ```
 The catalot service has a UI for all data in the catalog via http only
@@ -312,7 +312,7 @@ Deploy to OpenShift and set labels
 npm run nodeshift && oc expose svc/coolstore-ui && \
 oc label dc/coolstore-ui app.kubernetes.io/part-of=coolstore --overwrite && \
 oc annotate dc/coolstore-ui app.openshift.io/connects-to=order-cart,catalog,inventory,order --overwrite && \
-oc annotate dc/coolstore-ui app.openshift.io/vcs-uri=https://github.com/RedHat-Middleware-Workshops/cloud-native-workshop-v2m4-labs.git --overwrite && \
+oc annotate dc/coolstore-ui app.openshift.io/vcs-uri=https://github.com:sshaaf/coolstore-knative.git --overwrite && \
 oc annotate dc/coolstore-ui app.openshift.io/vcs-ref=ocp-4.13 --overwrite
 ```
 
@@ -356,24 +356,24 @@ The following CR is used for KEDA and Payment service
 apiVersion: sources.knative.dev/v1beta1
 kind: KafkaSource
 metadata:
-name: kafka-source
-namespace: YOURNAMESPACE
-annotations:
-autoscaling.knative.dev/class: keda.autoscaling.knative.dev
-autoscaling.knative.dev/minScale: "0"
-autoscaling.knative.dev/maxScale: "10"
-keda.autoscaling.knative.dev/pollingInterval: "10"
-keda.autoscaling.knative.dev/cooldownPeriod: "10"
-keda.autoscaling.knative.dev/kafkaLagThreshold: "10"
+  name: kafka-source
+  namespace: user2-cloudnativeapps
+  annotations:
+    autoscaling.knative.dev/class: keda.autoscaling.knative.dev
+    autoscaling.knative.dev/minScale: "0" 
+    autoscaling.knative.dev/maxScale: "10" 
+    keda.autoscaling.knative.dev/pollingInterval: "10"
+    keda.autoscaling.knative.dev/cooldownPeriod: "10"
+    keda.autoscaling.knative.dev/kafkaLagThreshold: "10"
 spec:
-consumerGroup: knative-group
-bootstrapServers:
-- my-cluster-kafka-bootstrap.YOURNAMESPACE:9092
-topics:
-- order
-sink:
-ref:
-apiVersion: serving.knative.dev/v1
-kind: Service
-name: payment
+  consumerGroup: knative-group
+  bootstrapServers:
+    - my-cluster-kafka-bootstrap.user2-cloudnativeapps:9092
+  topics:
+    - orders
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: payment
 ```

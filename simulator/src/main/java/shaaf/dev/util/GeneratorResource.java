@@ -17,7 +17,8 @@ public class GeneratorResource {
     @Path("orders/{number}")
     @Produces(MediaType.APPLICATION_JSON)
     public List<Order> cartCheckouts(@PathParam("number") int numberOfCartCheckouts) {
-       return orderRequests.generateCarts(numberOfCartCheckouts, true);
+        System.out.println("processing orders number = "+numberOfCartCheckouts);
+        return orderRequests.generateCarts(numberOfCartCheckouts, false);
     }
 
 }
